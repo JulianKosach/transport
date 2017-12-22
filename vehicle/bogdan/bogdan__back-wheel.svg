@@ -1,0 +1,9 @@
+<svg width="800" height="780" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 780">
+	<g stroke="#888" stroke-width="30" fill="#ccc">
+		<rect x="95" y="15" rx="30" ry="30" width="280" height="750" />
+		<rect x="410" y="15" rx="30" ry="30" width="280" height="750" />
+	</g>
+	<g stroke="rgb(80,180,200)" stroke-width="20">
+		<line x1="0" y1="395" x2="800" y2="395" stroke-dasharray="260, 70, 140, 70" />
+	</g>
+</svg>

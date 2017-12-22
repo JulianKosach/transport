@@ -86,12 +86,16 @@ function Transport(settings) {
 	this.ctx = this.canvas.getContext("2d");
 	this.max_scale = parseFloat(settings.max_scale) || 8;
 	this.min_scale = parseFloat(settings.min_scale) || 30;
-	this.scale = parseFloat(settings.scale) || 14;
+	this.scale = parseFloat(settings.scale) || 12;
 	this.vehicle = new Bus({
 		game: this,
 		model: 'bogdan',
 		width: 2380,
 		length: 7430,
+		steering_wheels__x: 730,
+		steering_wheels__y: 1020,
+		front_wheels__y: 2525,
+		back_wheels__y: 1290,
 		scale: this.scale
 	});
 	this.init();
@@ -114,10 +118,10 @@ Transport.prototype.showControls = function(){
 Transport.prototype.renderVehicle = function(){
 	this.ctx.drawImage(
 		this.vehicle.render(), 
-		this.canvas.width/2 - this.vehicle.options.width/(2*this.scale), 
-		this.canvas.height/2 - this.vehicle.options.length/(2*this.scale), 
-		this.vehicle.options.width/this.scale, 
-		this.vehicle.options.length/this.scale
+		Math.round( this.canvas.width/2 - this.vehicle.canvas.width/2 ), 
+		Math.round( this.canvas.height/2 - this.vehicle.canvas.height/2 ), 
+		Math.round( this.vehicle.canvas.width ), 
+		Math.round( this.vehicle.canvas.height )
 	);
 	return this;
 }
@@ -135,8 +139,8 @@ Transport.prototype.render = function(){
 
 Transport.prototype.resizeCanvas = function() {
 	var size = getComputedStyle(this.el.querySelector('.transport__screen'));
-	this.canvas.width = parseFloat(size.width);
-	this.canvas.height = parseFloat(size.height);
+	this.canvas.width = parseInt(size.width);
+	this.canvas.height = parseInt(size.height);
 }
 
 Transport.prototype.bindResizeCanvas = function() {
@@ -195,8 +199,8 @@ function Vehicle(options){
 	this.options = options || {};
 	this.game = options.game;
 	this.canvas = document.createElement("canvas");
-  this.canvas.width = options.width/this.game.scale;
-  this.canvas.height = options.length/this.game.scale;
+  this.canvas.width = Math.round( options.width*2/this.game.scale );
+  this.canvas.height = Math.round( options.length*2/this.game.scale );
 	this.ctx = this.canvas.getContext("2d");
 	this.controls = options.controls || new Controls;
 	this.model = options.model || 'car';
@@ -204,11 +208,17 @@ function Vehicle(options){
 	this.steering_max_angle = options.steering_max_angle || 45;
 	this.steering_wheel_max_angle = options.steering_max_angle || 520;
 	this.steering_angle_speed = options.steering_angle_speed || 2;
+	this.steering_wheels__x = options.steering_wheels__x || 0;
+	this.steering_wheels__y = options.steering_wheels__y || 0;
+	this.front_wheels__x = options.front_wheels__x || Math.round( options.width/2 );
+	this.front_wheels__y = options.front_wheels__y || Math.round( options.length/3 );
+	this.back_wheels__x = options.back_wheels__x || Math.round( options.width/2 );
+	this.back_wheels__y = options.back_wheels__y || Math.round( options.length/3 );
 }
 
 Vehicle.prototype.scaleCanvas = function() {
-  this.canvas.width = this.options.width/this.game.scale;
-  this.canvas.height = this.options.length/this.game.scale;
+  this.canvas.width = Math.round( this.options.width*2/this.game.scale );
+  this.canvas.height = Math.round( this.options.length*2/this.game.scale );
 	return this;
 }
 
@@ -224,37 +234,55 @@ Vehicle.prototype.renderWheels = function(onlyaxles){
 	// draw back wheels
 	var back_wheel = new Image();
 	back_wheel.src = (onlyaxles) ? 'vehicle/'+this.model+'/'+this.model+'__back-wheel--axle.svg' : 'vehicle/'+this.model+'/'+this.model+'__back-wheel.svg';
-	this.ctx.drawImage(back_wheel, 0, 4640/this.game.scale, back_wheel.width/this.game.scale, back_wheel.height/this.game.scale);
-	this.ctx.drawImage(back_wheel, (this.options.width-back_wheel.width)/this.game.scale, 4640/this.game.scale, back_wheel.width/this.game.scale, back_wheel.height/this.game.scale);
+	this.ctx.drawImage(
+		back_wheel,
+		Math.round( this.canvas.width/2 - this.back_wheels__x/this.game.scale ),
+		Math.round( this.canvas.height/2 + this.back_wheels__y/this.game.scale - back_wheel.height/(2*this.game.scale) ),
+		Math.round( back_wheel.width/this.game.scale ),
+		Math.round( back_wheel.height/this.game.scale )
+	);
+	this.ctx.drawImage(
+		back_wheel,
+		Math.round( this.canvas.width/2 + (this.back_wheels__x-back_wheel.width)/this.game.scale ),
+		Math.round( this.canvas.height/2 + this.back_wheels__y/this.game.scale - back_wheel.height/(2*this.game.scale) ),
+		Math.round( back_wheel.width/this.game.scale ),
+		Math.round( back_wheel.height/this.game.scale )
+	);
 	// draw front wheels
 	var front_wheel = new Image();
 	front_wheel.src = (onlyaxles) ? 'vehicle/'+this.model+'/'+this.model+'__front-wheel--axle.svg' : 'vehicle/'+this.model+'/'+this.model+'__front-wheel.svg';
 	drawImageCenter(this.ctx, front_wheel, {
 	 	rotation: this.steering_angle,
 	 	scale: this.game.scale,
-	  x: front_wheel.width/2,
-	  y: 1190
+	  x: Math.round( this.canvas.width*this.game.scale/2 - this.front_wheels__x + front_wheel.width/2 ),
+	  y: Math.round( this.canvas.height*this.game.scale/2 - this.front_wheels__y )
 	});
 	drawImageCenter(this.ctx, front_wheel, {
 	  rotation: this.steering_angle,
 	  scale: this.game.scale,
-	  x: 1680+front_wheel.width/2,
-	  y: 1190
+	  x: Math.round( this.canvas.width*this.game.scale/2 + this.front_wheels__x - front_wheel.width/2 ),
+	  y: Math.round( this.canvas.height*this.game.scale/2 - this.front_wheels__y )
 	 });
 };
 
 Vehicle.prototype.renderInrerior = function(){
 	var interior = new Image();
 	interior.src = 'vehicle/'+this.model+'/'+this.model+'__interior.svg';
-	this.ctx.drawImage(interior, 0, 0, interior.width/this.game.scale, interior.height/this.game.scale);
+	this.ctx.drawImage(
+		interior,
+		Math.round( this.canvas.width/2 - interior.width/(2*this.game.scale) ),
+		Math.round( this.canvas.height/2 - interior.height/(2*this.game.scale) ),
+		Math.round( interior.width/this.game.scale ),
+		Math.round( interior.height/this.game.scale )
+	);
 	// draw steering wheel
 	var steering_wheel = new Image();
 	steering_wheel.src = 'vehicle/'+this.model+'/'+this.model+'__steering-wheel.svg';
 	drawImageCenter(this.ctx, steering_wheel, {
-	 	rotation: this.steering_angle*this.steering_wheel_max_angle/this.steering_max_angle,
+	 	rotation: Math.round( this.steering_angle*this.steering_wheel_max_angle/this.steering_max_angle ),
 	 	scale: this.game.scale,
-	  x: 380+steering_wheel.width/2,
-	  y: 660+steering_wheel.height/2
+	  x: Math.round( this.canvas.width*this.game.scale/2 - this.options.width/2 + this.steering_wheels__x - steering_wheel.width/2 ),
+	  y: Math.round( this.canvas.height*this.game.scale/2 - this.options.length/2 + this.steering_wheels__y - steering_wheel.height/2 )
 	});
 };
 
@@ -264,9 +292,15 @@ Vehicle.prototype.render = function(){
 	// draw frame
 	var frame = new Image();
   frame.src = 'vehicle/'+this.model+'/'+this.model+'__frame.svg';
-  this.ctx.drawImage(frame, 0, 0, frame.width/this.game.scale, frame.height/this.game.scale);
+  this.ctx.drawImage(
+  	frame,
+		Math.round( this.canvas.width/2 - frame.width/(2*this.game.scale) ),
+		Math.round( this.canvas.height/2 - frame.height/(2*this.game.scale) ),
+		Math.round( frame.width/this.game.scale ),
+		Math.round( frame.height/this.game.scale )
+  );
   // draw interior
-	if (true) {
+	if (false) {
 		this.renderInrerior();
 		this.renderWheels(true);
 	} else {

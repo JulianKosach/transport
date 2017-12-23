@@ -1,4 +1,23 @@
-<svg width="2580" height="7630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-100 -100 2580 7630">
+<svg width="2980" height="7830" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-300 -200 2980 7830">
+
+	<defs>
+	  <linearGradient id="linear-left" x1="0%" y1="0%" x2="100%" y2="0%">
+	    <stop offset="0%"   stop-color="rgba(255,118,1,0)"/>
+	    <stop offset="100%" stop-color="rgba(255,118,1,0.3)"/>
+	  </linearGradient>
+	</defs>
+
+	<g transform="translate(190, -100) rotate(60)">
+		<path d="M 180 130 l -180 -130 l 0 380 l 180 -130 z" stroke="none" stroke-width="0" fill="url(#linear-left)"/>
+	</g>
+
+	<g transform="translate(-230, 1520)">
+		<path d="M 180 130 l -180 -130 l 0 380 l 180 -130 z" stroke="none" stroke-width="0" fill="url(#linear-left)"/>
+	</g>
+
+	<g transform="translate(-30, 7630) rotate(-90)">
+		<path d="M 180 130 l -180 -130 l 0 380 l 180 -130 z" stroke="none" stroke-width="0" fill="url(#linear-left)"/>
+	</g>
 
 	<path d="M 110 180 q 10 -25 50 -20 z" stroke="#ff7702" stroke-width="20" fill="#ff7702" stroke-linecap="round" />
 	<path d="M 240 110 q 20 -35 140 -30 z" stroke="#f9ffc8" stroke-width="20" fill="#f9ffc8" stroke-linecap="round" />

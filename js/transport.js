@@ -84,9 +84,9 @@ function Transport(settings) {
 	this.el = document.getElementById('transport');
 	this.canvas = document.getElementById("trsp_canvas");
 	this.ctx = this.canvas.getContext("2d");
-	this.max_scale = parseFloat(settings.max_scale) || 8;
-	this.min_scale = parseFloat(settings.min_scale) || 30;
-	this.scale = parseFloat(settings.scale) || 12;
+	this.max_scale = parseInt(settings.max_scale) || 10;
+	this.min_scale = parseInt(settings.min_scale) || 40;
+	this.scale = parseInt(settings.scale) || 12;
 	this.vehicle = new Bus({
 		game: this,
 		model: 'bogdan',
@@ -214,6 +214,13 @@ function Vehicle(options){
 	this.front_wheels__y = options.front_wheels__y || Math.round( options.length/3 );
 	this.back_wheels__x = options.back_wheels__x || Math.round( options.width/2 );
 	this.back_wheels__y = options.back_wheels__y || Math.round( options.length/3 );
+	this.lights = {
+		dipped_beam: false,
+		brake: false,
+		turn_left: false,
+		turn_right: false,
+		emergency: false
+	};
 }
 
 Vehicle.prototype.scaleCanvas = function() {
@@ -286,9 +293,52 @@ Vehicle.prototype.renderInrerior = function(){
 	});
 };
 
+Vehicle.prototype.turnLights = function(lights_type, turned){
+	if (lights_type === 'brake') this.lights.brake = turned || false;
+	return this;
+};
+
+Vehicle.prototype.renderLights = function(){
+	if (this.lights.turn_left) {
+		var light_left = new Image();
+		light_left.src = 'vehicle/'+this.model+'/'+this.model+'__light-left.svg';
+		this.ctx.drawImage(
+			light_left,
+			Math.round( this.canvas.width/2 - light_left.width/(2*this.game.scale) ),
+			Math.round( this.canvas.height/2 - light_left.height/(2*this.game.scale) ),
+			Math.round( light_left.width/this.game.scale ),
+			Math.round( light_left.height/this.game.scale )
+		);
+	}
+	if (this.lights.turn_right) {
+		var light_right = new Image();
+		light_right.src = 'vehicle/'+this.model+'/'+this.model+'__light-right.svg';
+		this.ctx.drawImage(
+			light_right,
+			Math.round( this.canvas.width/2 - light_right.width/(2*this.game.scale) ),
+			Math.round( this.canvas.height/2 - light_right.height/(2*this.game.scale) ),
+			Math.round( light_right.width/this.game.scale ),
+			Math.round( light_right.height/this.game.scale )
+		);
+	}
+	if (this.lights.brake) {
+		var light_stop = new Image();
+		light_stop.src = 'vehicle/'+this.model+'/'+this.model+'__light-stop.svg';
+		this.ctx.drawImage(
+			light_stop,
+			Math.round( this.canvas.width/2 - light_stop.width/(2*this.game.scale) ),
+			Math.round( this.canvas.height/2 - light_stop.height/(2*this.game.scale) ),
+			Math.round( light_stop.width/this.game.scale ),
+			Math.round( light_stop.height/this.game.scale )
+		);
+	}
+	return this;
+};
+
 Vehicle.prototype.render = function(){
-	this.controlsHandler();
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.controlsHandler();
+	this.renderLights();
 	// draw frame
 	var frame = new Image();
   frame.src = 'vehicle/'+this.model+'/'+this.model+'__frame.svg';
@@ -300,7 +350,7 @@ Vehicle.prototype.render = function(){
 		Math.round( frame.height/this.game.scale )
   );
   // draw interior
-	if (false) {
+	if (true) {
 		this.renderInrerior();
 		this.renderWheels(true);
 	} else {
@@ -315,6 +365,8 @@ Vehicle.prototype.controlsHandler = function(){
 	for (key in ctrls) {
 				 if ( (key === 'left' || key === 'a') && ctrls[key] ) this.turnSteering('left');
 		else if ( (key === 'right' || key === 'd') && ctrls[key] ) this.turnSteering('right');
+
+		else if ( (key === 'bottom' || key === 's') ) this.turnLights('brake', (ctrls['bottom'] || ctrls['s']));
 	}
 	return this;
 };
@@ -341,18 +393,14 @@ Bus.prototype.renderInrerior = function(){
 	drawImageCenter(this.ctx, door, {
 	 	// rotation: (this.steering_angle*4 > -90) ? this.steering_angle*4 : -90,
 	 	scale: this.game.scale,
-	  x: 2150,
-	  y: 2650,
-	  cx: -150,
-	  cy: 350
+	  x: Math.round( this.canvas.width*this.game.scale/2 + this.options.width/2 - door.width/2 ),
+	  y: Math.round( this.canvas.height*this.game.scale/2 - door.height/2 - 660 )
 	});
 	drawImageCenter(this.ctx, door, {
 	 	// rotation: (this.steering_angle*4 > -90) ? this.steering_angle*4 : -90,
 	 	scale: this.game.scale,
-	  x: 2150,
-	  y: 5850,
-	  cx: -150,
-	  cy: 350
+	  x: Math.round( this.canvas.width*this.game.scale/2 + this.options.width/2 - door.width/2 ),
+	  y: Math.round( this.canvas.height*this.game.scale/2 - door.height/2 + 2540 )
 	});
 };
 

@@ -219,7 +219,9 @@ function Vehicle(options){
 		brake: false,
 		turn_left: false,
 		turn_right: false,
-		emergency: false
+		emergency: false,
+		turn_timer: new Date(),
+		render_timer: new Date()
 	};
 }
 
@@ -294,12 +296,59 @@ Vehicle.prototype.renderInrerior = function(){
 };
 
 Vehicle.prototype.turnLights = function(lights_type, turned){
-	if (lights_type === 'brake') this.lights.brake = turned || false;
+	if (lights_type === 'brake') {
+		this.lights.brake = turned || false;
+		return this;
+	}
+	var time_diff = new Date() - this.lights.turn_timer;
+	if ( time_diff < 500 ) return this;
+	if (lights_type === 'turn_left') {
+		if (this.lights.turn_left) {
+			this.lights.turn_left = false;
+		} else {
+			this.lights.emergency = false;
+			this.lights.turn_right = false;
+			this.lights.turn_left = true;
+			this.lights.render_timer = new Date();
+		}
+	}
+	if (lights_type === 'turn_right') {
+		if (this.lights.turn_right) {
+			this.lights.turn_right = false;
+		} else {
+			this.lights.emergency = false;
+			this.lights.turn_left = false;
+			this.lights.turn_right = true;
+			this.lights.render_timer = new Date();
+		}
+	}
+	if (lights_type === 'emergency') {
+		if (this.lights.emergency) {
+			this.lights.emergency = false;
+		} else {
+			this.lights.emergency = true;
+			this.lights.render_timer = new Date();
+		}
+	}
+	this.lights.turn_timer = new Date();
 	return this;
 };
 
 Vehicle.prototype.renderLights = function(){
-	if (this.lights.turn_left) {
+	if (this.lights.brake) {
+		var light_stop = new Image();
+		light_stop.src = 'vehicle/'+this.model+'/'+this.model+'__light-stop.svg';
+		this.ctx.drawImage(
+			light_stop,
+			Math.round( this.canvas.width/2 - light_stop.width/(2*this.game.scale) ),
+			Math.round( this.canvas.height/2 - light_stop.height/(2*this.game.scale) ),
+			Math.round( light_stop.width/this.game.scale ),
+			Math.round( light_stop.height/this.game.scale )
+		);
+	}
+	var time_diff = new Date() - this.lights.render_timer;
+	if (  Math.floor(time_diff/500) % 2 ) return this;
+	if (this.lights.turn_left || this.lights.emergency) {
 		var light_left = new Image();
 		light_left.src = 'vehicle/'+this.model+'/'+this.model+'__light-left.svg';
 		this.ctx.drawImage(
@@ -310,7 +359,7 @@ Vehicle.prototype.renderLights = function(){
 			Math.round( light_left.height/this.game.scale )
 		);
 	}
-	if (this.lights.turn_right) {
+	if (this.lights.turn_right || this.lights.emergency) {
 		var light_right = new Image();
 		light_right.src = 'vehicle/'+this.model+'/'+this.model+'__light-right.svg';
 		this.ctx.drawImage(
@@ -319,17 +368,6 @@ Vehicle.prototype.renderLights = function(){
 			Math.round( this.canvas.height/2 - light_right.height/(2*this.game.scale) ),
 			Math.round( light_right.width/this.game.scale ),
 			Math.round( light_right.height/this.game.scale )
-		);
-	}
-	if (this.lights.brake) {
-		var light_stop = new Image();
-		light_stop.src = 'vehicle/'+this.model+'/'+this.model+'__light-stop.svg';
-		this.ctx.drawImage(
-			light_stop,
-			Math.round( this.canvas.width/2 - light_stop.width/(2*this.game.scale) ),
-			Math.round( this.canvas.height/2 - light_stop.height/(2*this.game.scale) ),
-			Math.round( light_stop.width/this.game.scale ),
-			Math.round( light_stop.height/this.game.scale )
 		);
 	}
 	return this;
@@ -366,7 +404,12 @@ Vehicle.prototype.controlsHandler = function(){
 				 if ( (key === 'left' || key === 'a') && ctrls[key] ) this.turnSteering('left');
 		else if ( (key === 'right' || key === 'd') && ctrls[key] ) this.turnSteering('right');
 
-		else if ( (key === 'bottom' || key === 's') ) this.turnLights('brake', (ctrls['bottom'] || ctrls['s']));
+		else if ( (key === 'bottom' || key === 's') ) {
+			this.turnLights('brake', (ctrls['bottom'] || ctrls['s']));
+		}
+		else if (key === 'q' && ctrls[key]) this.turnLights('turn_left');
+		else if (key === 'e' && ctrls[key]) this.turnLights('turn_right');
+		else if (key === 'r' && ctrls[key]) this.turnLights('emergency');
 	}
 	return this;
 };
@@ -382,28 +425,64 @@ Vehicle.prototype.controlsHandler = function(){
 
 function Bus(settings) {
 	Vehicle.apply(this, arguments);
+	this.doors = {
+		doors_y: [
+			-660,
+			2540
+		],
+		opened: false,
+		angle: 0,
+		open_timer: 0,
+		time_for_open: 1200
+	}
 }
 Bus.prototype = Object.create(Vehicle.prototype);
 Bus.prototype.constructor = Vehicle;
 
 Bus.prototype.renderInrerior = function(){
 	Vehicle.prototype.renderInrerior.call(this, arguments);
-	var door = new Image();
-	door.src = 'vehicle/'+this.model+'/'+this.model+'__door.svg';
-	drawImageCenter(this.ctx, door, {
-	 	// rotation: (this.steering_angle*4 > -90) ? this.steering_angle*4 : -90,
-	 	scale: this.game.scale,
-	  x: Math.round( this.canvas.width*this.game.scale/2 + this.options.width/2 - door.width/2 ),
-	  y: Math.round( this.canvas.height*this.game.scale/2 - door.height/2 - 660 )
-	});
-	drawImageCenter(this.ctx, door, {
-	 	// rotation: (this.steering_angle*4 > -90) ? this.steering_angle*4 : -90,
-	 	scale: this.game.scale,
-	  x: Math.round( this.canvas.width*this.game.scale/2 + this.options.width/2 - door.width/2 ),
-	  y: Math.round( this.canvas.height*this.game.scale/2 - door.height/2 + 2540 )
-	});
+	this.renderDoors();
+	return this;
 };
 
+Bus.prototype.renderDoors = function(){
+	var time_diff = Math.round( (new Date() - this.doors.open_timer)*90/this.doors.time_for_open );
+	if (this.doors.opened) {
+		this.doors.angle = Math.max(-time_diff, -90);
+	} else {
+		this.doors.angle = Math.min(-90 + time_diff, 0);
+	}
+	var door = new Image();
+	door.src = 'vehicle/'+this.model+'/'+this.model+'__door.svg';
+	for (var i=0; i<this.doors.doors_y.length; i++) {
+		drawImageCenter(this.ctx, door, {
+		 	rotation: Math.round(this.doors.angle),
+		 	scale: this.game.scale,
+		  x: Math.round( this.canvas.width*this.game.scale/2 + this.options.width/2 - door.width/2 ),
+		  y: Math.round( this.canvas.height*this.game.scale/2 - door.height/2 + this.doors.doors_y[i] ),
+		  cx: door.width/2 + Math.round(this.doors.angle*3),
+		  cy: door.height/2 - Math.round(this.doors.angle*2)
+		});
+	}
+	return this;
+};
+
+Bus.prototype.openDoors = function(){
+	var time_diff = new Date() - this.doors.open_timer;
+	if ( time_diff < this.doors.time_for_open ) return this;
+	this.doors.opened = (this.doors.opened) ? false : true;
+	this.doors.open_timer = new Date();
+	return this;
+};
+
+Bus.prototype.controlsHandler = function(){
+	Vehicle.prototype.controlsHandler.call(this, arguments);
+	var ctrls = this.controls;
+	for (key in ctrls) {
+		if ( key === 't' && ctrls[key] ) this.openDoors();
+	}
+	return this;
+};
 
 //  ------ BUS CLASS -- END ------  //
 

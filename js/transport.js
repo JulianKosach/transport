@@ -250,8 +250,23 @@ function Vehicle(options){
 		accelerate_speed: 26,
 		accelerate: false,
 		brake: false,
-		brake_speed: 50,
+		brake_speed: 70,
 		hand_brake: false,
+		gear: 'N',
+		gear_number: 0.01,
+		engine: {
+			started: false,
+			revolutions: 0,
+			min_revolutions: 1100,
+			max_revolutions: 6000,
+			turn_timer: new Date()
+		},
+		gears: {
+			'R': -10,
+			'N': 0,
+			'1': 2,
+			'2': 1
+		},
 		render_timer: new Date()
 	};
 }
@@ -262,12 +277,22 @@ Vehicle.prototype.scaleCanvas = function() {
 	return this;
 }
 
+Vehicle.prototype.turnEngine = function(){
+	var time_diff = new Date() - this.move.engine.turn_timer;
+	if ( time_diff < 200 ) return this;
+	this.move.engine.turned = !this.move.engine.turned;
+	this.move.engine.revolutions = (this.move.engine.turned)? this.move.engine.min_revolutions : 0;
+	this.move.engine.turn_timer = new Date();
+	return this;
+};
+
 Vehicle.prototype.turnSteering = function(direction){
 	if (direction === 'left') {
 		if (this.steering_angle > -this.steering_max_angle) this.steering_angle -= this.steering_angle_speed;
 	} else if (direction === 'right') {
 		if (this.steering_angle < this.steering_max_angle) this.steering_angle += this.steering_angle_speed;
 	}
+	return this;
 };
 
 Vehicle.prototype.renderWheels = function(onlyaxles){
@@ -462,6 +487,9 @@ Vehicle.prototype.controlsHandler = function(){
 		else if ( (key === 'top' || key === 'w') ) {
 			this.move.accelerate = (ctrls['top'] || ctrls['w']);
 		}
+
+		else if (key === 'f' && ctrls[key]) this.turnEngine();
+
 		else if (key === 'q' && ctrls[key]) this.turnLights('turn_left');
 		else if (key === 'e' && ctrls[key]) this.turnLights('turn_right');
 		else if (key === 'r' && ctrls[key]) this.turnLights('emergency');
@@ -473,13 +501,27 @@ Vehicle.prototype.controlsHandler = function(){
 
 Vehicle.prototype.renderMove = function(){
 	var time_diff = (new Date() - this.move.render_timer);
-	if (this.move.accelerate) {
-		this.move.speed = this.move.speed + this.move.accelerate_speed*time_diff/3600;
+	if (this.move.engine.turned && this.move.accelerate) {
+		this.move.engine.revolutions = Math.min( (this.move.engine.revolutions + 3*time_diff), this.move.engine.max_revolutions);
+	} else {
+		this.move.engine.revolutions = (this.move.engine.turned) ? Math.max( this.move.engine.revolutions - 500, this.move.engine.min_revolutions) : 0;
 	}
+	var revolutions_diff = Math.max(this.move.engine.revolutions - this.move.engine.min_revolutions, 0);
+	this.move.speed = this.move.speed + this.move.gear_number*revolutions_diff*(time_diff/3600);
+	if (this.move.speed > 0) {
+		this.move.speed = Math.max(this.move.speed-3*(time_diff/3600), 0);
+	} else {
+		this.move.speed = Math.min(this.move.speed+3*(time_diff/3600), 0);
+	} 
 	if (this.move.brake) {
+		this.move.engine.revolutions = (this.move.engine.turned) ? this.move.engine.min_revolutions : 0;
 		this.move.speed = Math.max( this.move.speed - this.move.brake_speed*time_diff/3600, 0);
 	}
-	this.move.y = this.move.y - this.move.speed*time_diff/3.6;
+	this.move.angle += this.steering_angle*this.move.speed/300;
+	this.move.y = this.move.y - this.move.speed*time_diff*Math.cos(this.move.angle*Math.PI/180)/3.6;
+	this.move.x = this.move.x + this.move.speed*time_diff*Math.sin(this.move.angle*Math.PI/180)/3.6;
+	document.getElementById('gear').innerHTML = this.move.gear;
+	document.getElementById('revolutions').innerHTML = this.move.engine.revolutions;
 	document.getElementById('speed').innerHTML = this.move.speed;
 	this.move.render_timer = new Date();
 	return this;

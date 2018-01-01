@@ -114,9 +114,12 @@ function Transport(settings) {
 	this.el = document.getElementById('transport');
 	this.canvas = document.getElementById("trsp_canvas");
 	this.ctx = this.canvas.getContext("2d");
+	this.ctrl_canvas = document.getElementById("trsp_ctrl_canvas");
+	this.ctrl_ctx = this.ctrl_canvas.getContext("2d");
 	this.max_scale = parseInt(settings.max_scale) || 10;
 	this.min_scale = parseInt(settings.min_scale) || 40;
 	this.scale = parseInt(settings.scale) || 31;
+	this.ctrl_scale = 1.5;
 	this.vehicle = new Bogdan({
 		game: this,
 		width: 2380,
@@ -145,11 +148,34 @@ Transport.prototype.renderVehicle = function(){
 	return this;
 }
 
+Transport.prototype.renderCtrl = function(){
+	var panel = new Image();
+	panel.src = 'vehicle/'+this.vehicle.model+'/'+this.vehicle.model+'__ctrl--panel.svg';
+	this.ctrl_ctx.drawImage(
+		panel,
+		Math.round( this.ctrl_canvas.width/2 - panel.width/(this.ctrl_scale*2) ),
+		Math.round( 0 ),
+		Math.round( panel.width/this.ctrl_scale ),
+		Math.round( panel.height/this.ctrl_scale )
+	);
+	var steering_wheel = new Image();
+	steering_wheel.src = 'vehicle/'+this.vehicle.model+'/'+this.vehicle.model+'__ctrl--steering-wheel.svg';
+	drawImageCenter(this.ctrl_ctx, steering_wheel, {
+	 	rotation: Math.round( this.vehicle.steering_angle*this.vehicle.steering_wheel_max_angle/this.vehicle.steering_max_angle ),
+	 	scale: this.ctrl_scale,
+	  x: Math.round( this.ctrl_canvas.width*this.ctrl_scale/2 ),
+	  y: Math.round( steering_wheel.height*4/5 )
+	});
+	return this;
+}
+
 Transport.prototype.render = function(){
 	var _this = this;
 	this.showControls();
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	this.renderVehicle();
+	this.ctrl_ctx.clearRect(0, 0, this.ctrl_canvas.width, this.ctrl_canvas.height);
+	this.renderCtrl();
 	setTimeout(function(){
 		_this.render();
 	}, parseInt(1000/_this.fps));
@@ -250,7 +276,7 @@ function Vehicle(options){
 		accelerate_speed: 26,
 		accelerate: false,
 		brake: false,
-		brake_speed: 70,
+		brake_speed: 80,
 		hand_brake: false,
 		gear: 'N',
 		gear_number: 0.01,
@@ -517,7 +543,12 @@ Vehicle.prototype.renderMove = function(){
 		this.move.engine.revolutions = (this.move.engine.turned) ? this.move.engine.min_revolutions : 0;
 		this.move.speed = Math.max( this.move.speed - this.move.brake_speed*time_diff/3600, 0);
 	}
-	this.move.angle += this.steering_angle*this.move.speed/300;
+	this.move.angle += this.steering_angle*this.move.speed/314;
+	if (this.steering_angle > 0) {
+		this.steering_angle = Math.max(0, this.steering_angle - Math.min(this.move.speed/20, 1));
+	} else {
+		this.steering_angle = Math.min(0, this.steering_angle + Math.min(this.move.speed/20, 1));
+	}
 	this.move.y = this.move.y - this.move.speed*time_diff*Math.cos(this.move.angle*Math.PI/180)/3.6;
 	this.move.x = this.move.x + this.move.speed*time_diff*Math.sin(this.move.angle*Math.PI/180)/3.6;
 	document.getElementById('gear').innerHTML = this.move.gear;

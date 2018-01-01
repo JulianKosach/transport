@@ -1,0 +1,28 @@
+<svg width="360" height="360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 360">
+	<g stroke="#878b8c" stroke-width="20" transform="translate(180, 180)">
+		<circle cx="0" cy="0" r="159" stroke="#808384" stroke-width="6" fill="none" />
+		<path d="M -140 80 
+			q 20 20 50 -10 
+			l 20 -25 
+			q 10 -15 10 -25 
+			l 0 -30 
+			q 0 -20 20 -25 
+			q 40 -5 80 0 
+			q 20 5 20 25 
+			l 0 30
+			q 0 10 10 25
+			l 20 25
+			q 30 30 50 10 
+			q -35 80 -80 68
+			q 30 -10 16 -40
+			q -15 -30 -35 -50
+			q -10 -10 -25 -10
+			l -32 0
+			q -15 0 -25 10
+			q -20 20 -35 50
+			q -14 30 16 40
+			q -45 12 -80 -68" stroke="#808384" stroke-width="6" fill="#878b8c" />
+		<circle cx="0" cy="0" r="170" stroke-width="20" fill="none" />
+		<circle cx="0" cy="0" r="174" stroke-width="4" fill="none" stroke="#9c9e9e" />
+	</g>
+</svg>

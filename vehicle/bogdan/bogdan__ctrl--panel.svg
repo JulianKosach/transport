@@ -1,0 +1,12 @@
+<svg width="400" height="360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 360">
+	<g>
+		<circle cx="130" cy="200" r="50" stroke="#606364" stroke-width="4" fill="#9b9c9c" />
+		<path d="M 100 230 
+			a 45 -45 90 0" stroke="#eee" stroke-width="3" fill="none" />
+
+		<circle cx="130" cy="200" r="3" stroke="#606364" stroke-width="6" fill="#9b9c9c" />
+		<text x="116" y="184" font-family="Verdana" font-size="10" style="font-style: italic; font-weight: normal" stroke="none" fill="#fff">km/h</text>
+
+		<text x="148" y="214" font-family="Verdana" font-size="8" stroke="none" fill="#fff">160</text>
+	</g>
+</svg>

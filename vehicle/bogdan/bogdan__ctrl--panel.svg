@@ -1,12 +1,26 @@
 <svg width="400" height="360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 360">
 	<g>
-		<circle cx="130" cy="200" r="50" stroke="#606364" stroke-width="4" fill="#9b9c9c" />
-		<path d="M 100 230 
-			a 45 -45 90 0" stroke="#eee" stroke-width="3" fill="none" />
+		<circle cx="130" cy="140" r="50" stroke="#606364" stroke-width="2" fill="#9b9c9c" />
+		<circle cx="130" cy="140" r="48" stroke="#606364" stroke-width="1" fill="#9b9c9c" />
+		<path d="M 90 158 
+			A 44 44, 0, 1, 1, 170 158" stroke="#fff" stroke-width="2" fill="none" />
 
-		<circle cx="130" cy="200" r="3" stroke="#606364" stroke-width="6" fill="#9b9c9c" />
-		<text x="116" y="184" font-family="Verdana" font-size="10" style="font-style: italic; font-weight: normal" stroke="none" fill="#fff">km/h</text>
+		<line x1="90" y1="156" x2="96" y2="153" stroke="#fff" stroke-width="4" />
 
-		<text x="148" y="214" font-family="Verdana" font-size="8" stroke="none" fill="#fff">160</text>
+		<line x1="130" y1="96" x2="130" y2="102" stroke="#fff" stroke-width="4" />
+
+		<circle cx="130" cy="140" r="3" stroke="#606364" stroke-width="6" fill="#9b9c9c" />
+		<text x="118" y="124" font-family="Verdana" font-size="10" style="font-style: italic; font-weight: normal" stroke="none" fill="#fff">km/h</text>
+
+		<text x="98" y="155" font-family="Verdana" font-size="8" stroke="none" fill="#fff">0</text>
+
+		<text x="125" y="110" font-family="Verdana" font-size="8" stroke="none" fill="#fff">80</text>
+		<text x="148" y="154" font-family="Verdana" font-size="8" stroke="none" fill="#fff">160</text>
+	</g>
+
+	<g>
+		<circle cx="280" cy="140" r="36" stroke="#606364" stroke-width="2" fill="#9b9c9c" />
+		<circle cx="280" cy="140" r="34" stroke="#606364" stroke-width="1" fill="#9b9c9c" />
+		<circle cx="280" cy="140" r="2" stroke="#606364" stroke-width="4" fill="#9b9c9c" />
 	</g>
 </svg>

@@ -110,7 +110,7 @@ Controls.prototype.bindControls = function(){
 function Transport(settings) {
 	settings = settings || {};
 	this.controls = settings.controls || new Controls();
-	this.fps = settings.fps || 25;
+	this.fps = settings.fps || 60;
 	this.el = document.getElementById('transport');
 	this.canvas = document.getElementById("trsp_canvas");
 	this.ctx = this.canvas.getContext("2d");
@@ -119,7 +119,7 @@ function Transport(settings) {
 	this.max_scale = parseInt(settings.max_scale) || 10;
 	this.min_scale = parseInt(settings.min_scale) || 40;
 	this.scale = parseInt(settings.scale) || 31;
-	this.ctrl_scale = 1.5;
+	this.ctrl_scale = 1.2;
 	this.vehicle = new Bogdan({
 		game: this,
 		width: 2380,
@@ -158,13 +158,21 @@ Transport.prototype.renderCtrl = function(){
 		Math.round( panel.width/this.ctrl_scale ),
 		Math.round( panel.height/this.ctrl_scale )
 	);
+	var speed_arr = new Image();
+	speed_arr.src = 'vehicle/'+this.vehicle.model+'/'+this.vehicle.model+'__ctrl--speed-arr.svg';
+	drawImageCenter(this.ctrl_ctx, speed_arr, {
+	 	rotation: Math.round( this.vehicle.move.speed*220/160 ),
+	 	scale: this.ctrl_scale,
+	  x: Math.round( this.ctrl_canvas.width*this.ctrl_scale/2 - 70 ),
+	  y: Math.round( speed_arr.height/2+85 )
+	});
 	var steering_wheel = new Image();
 	steering_wheel.src = 'vehicle/'+this.vehicle.model+'/'+this.vehicle.model+'__ctrl--steering-wheel.svg';
 	drawImageCenter(this.ctrl_ctx, steering_wheel, {
 	 	rotation: Math.round( this.vehicle.steering_angle*this.vehicle.steering_wheel_max_angle/this.vehicle.steering_max_angle ),
 	 	scale: this.ctrl_scale,
 	  x: Math.round( this.ctrl_canvas.width*this.ctrl_scale/2 ),
-	  y: Math.round( steering_wheel.height*4/5 )
+	  y: Math.round( steering_wheel.height/2+50 )
 	});
 	return this;
 }
@@ -284,7 +292,7 @@ function Vehicle(options){
 			started: false,
 			revolutions: 0,
 			min_revolutions: 1100,
-			max_revolutions: 6000,
+			max_revolutions: 4300,
 			turn_timer: new Date()
 		},
 		gears: {

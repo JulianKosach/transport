@@ -133,15 +133,24 @@ function Transport(settings) {
 	this.init();
 }
 
-Transport.prototype.showControls = function(){
-
+Transport.prototype.renderBackground = function(){
+	var s_1_1 = new Image();
+	s_1_1.src = 'map/1/1_1.svg';
+	this.ctx.drawImage(
+		s_1_1,
+		Math.round( 0 ),
+		Math.round( 0 ),
+		Math.round( s_1_1.width/this.scale ),
+		Math.round( s_1_1.height/this.scale )
+	);
 	return this;
 };
 
 Transport.prototype.renderVehicle = function(){
 	var vehicle = this.vehicle;
 	drawImageCenter(this.ctx, vehicle.render(), {
-		rotation: Math.round(vehicle.move.angle),
+		rotation: vehicle.move.angle,
+		cy: vehicle.render().height/2+60,
 		x: Math.round( vehicle.move.x/this.scale ),
 		y: Math.round( vehicle.move.y/this.scale )
 	});
@@ -179,8 +188,8 @@ Transport.prototype.renderCtrl = function(){
 
 Transport.prototype.render = function(){
 	var _this = this;
-	this.showControls();
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.renderBackground();
 	this.renderVehicle();
 	this.ctrl_ctx.clearRect(0, 0, this.ctrl_canvas.width, this.ctrl_canvas.height);
 	this.renderCtrl();
@@ -260,7 +269,7 @@ function Vehicle(options){
 	this.steering_angle = 0;
 	this.steering_max_angle = options.steering_max_angle || 45;
 	this.steering_wheel_max_angle = options.steering_max_angle || 520;
-	this.steering_angle_speed = options.steering_angle_speed || 2;
+	this.steering_angle_speed = options.steering_angle_speed || 3;
 	this.steering_wheels__x = options.steering_wheels__x || 0;
 	this.steering_wheels__y = options.steering_wheels__y || 0;
 	this.front_wheels__x = options.front_wheels__x || Math.round( options.width/2 );
@@ -546,7 +555,9 @@ Vehicle.prototype.renderMove = function(){
 		this.move.speed = Math.max(this.move.speed-3*(time_diff/3600), 0);
 	} else {
 		this.move.speed = Math.min(this.move.speed+3*(time_diff/3600), 0);
-	} 
+	}
+	this.move.speed = Math.min(this.move.speed, 160);
+	this.move.speed = Math.max(this.move.speed, -30);
 	if (this.move.brake) {
 		this.move.engine.revolutions = (this.move.engine.turned) ? this.move.engine.min_revolutions : 0;
 		this.move.speed = Math.max( this.move.speed - this.move.brake_speed*time_diff/3600, 0);
